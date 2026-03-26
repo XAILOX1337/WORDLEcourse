@@ -1,4 +1,8 @@
-﻿namespace WORDLE;
+﻿#nullable disable
+
+using System.Drawing.Drawing2D;
+
+namespace WORDLE;
 
 partial class Form1
 {
@@ -31,7 +35,7 @@ partial class Form1
 
         this.Size = new System.Drawing.Size(size_x, size_y);
         this.Text = "WORDLE";
-        this.BackColor = Color.FromArgb(26, 26, 26);
+        this.BackColor = Color.FromArgb(18, 18, 18);
         create_tiles();
         create_keyboard();
         this.CenterToScreen();
@@ -43,8 +47,8 @@ partial class Form1
     private Panel panel_tiles = new Panel();
     private int size_x = 900;
     private int size_y = 1100;
-    private Color tile_color = Color.FromArgb(51, 51, 51);
-    private Color key_color = Color.FromArgb(128, 128, 128); // Светло-серый для не введённых букв
+    private Color tile_color = Color.FromArgb(18, 18, 19); // Более мягкий серый для плиток
+    private Color key_color = Color.FromArgb(129, 131, 132); // Мягкий серый для клавиш
 
     private void create_keyboard()
     {
@@ -134,7 +138,24 @@ partial class Form1
             {
                 keys_dict.Add(key.Name, key);
             }
+            
+            // Делаем закругленные углы клавиши
+            MakeLabelRounded(key, 10);
         }
+    }
+
+    /// <summary>
+    /// Делает углы Label закругленными
+    /// </summary>
+    private void MakeLabelRounded(Label label, int radius)
+    {
+        GraphicsPath path = new GraphicsPath();
+        path.AddArc(0, 0, radius, radius, 180, 90);
+        path.AddArc(label.Width - radius, 0, radius, radius, 270, 90);
+        path.AddArc(label.Width - radius, label.Height - radius, radius, radius, 0, 90);
+        path.AddArc(0, label.Height - radius, radius, radius, 90, 90);
+        path.CloseAllFigures();
+        label.Region = new Region(path);
     }
 
     private void create_tiles()
@@ -163,6 +184,7 @@ partial class Form1
                 tile.Visible = true;
                 tiles_dict.Add(tile.Name, tile);
                 panel_tiles.Controls.Add(tile);
+                
             }
         }
         panel_tiles.Size = new Size(5 * (tile_size + space) + 4 * space, 6 * (tile_size + space) + 5 * space);
@@ -179,30 +201,138 @@ partial class Form1
             Font = new Font("Calibri", 20, FontStyle.Bold),
             BorderStyle = BorderStyle.FixedSingle,
             TextAlign = ContentAlignment.MiddleCenter,
-            ForeColor = Color.White
+            ForeColor = Color.White,
+            AutoSize = false
         };
         if (win != "")
         {
             end_window.Text = "You won!\n" + win;
             end_window.BackColor = game.green;
+            game.input_blocked = true;
         }
         else
         {
             end_window.Text = "You lost. Correct word: " + game.word.ToUpper();
             end_window.BackColor = game.red;
+            game.input_blocked = true;
         }
 
         end_window.Visible = true;
+        end_window.Size = new Size(8 * size_x / 9, size_y / 6);
 
-        end_window.Size = new Size(8 * size_x / 9, size_y / 5);
+        // Создаем панель для кнопок
+        Panel buttons_panel = new Panel
+        {
+            Size = new Size(8 * size_x / 9, 100),
+            BackColor = Color.Transparent,
+            Location = new Point(0, end_window.Size.Height + 20)
+        };
+
+        // Кнопка "Сыграть еще раз" - запускает новую игру
+        Button playAgainButton = new Button
+        {
+            Text = "Сыграть еще раз",
+            Font = new Font("Calibri", 14, FontStyle.Bold),
+            ForeColor = Color.White,
+            BackColor = game.green,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand,
+            Width = 200,
+            Height = 45,
+            Location = new Point((buttons_panel.Width - 420) / 2, 10)
+        };
+        
+        playAgainButton.FlatAppearance.BorderSize = 0;
+        playAgainButton.Click += PlayAgainButton_Click;
+
+        // Кнопка "Выйти из игры" - закрывает приложение
+        Button exitButton = new Button
+        {
+            Text = "Выйти из игры",
+            Font = new Font("Calibri", 14, FontStyle.Bold),
+            ForeColor = Color.White,
+            BackColor = game.red,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand,
+            Width = 200,
+            Height = 45,
+            Location = new Point((buttons_panel.Width - 420) / 2 + 220, 10)
+        };
+        exitButton.FlatAppearance.BorderSize = 0;
+        exitButton.Click += ExitButton_Click;
+
+        buttons_panel.Controls.Add(playAgainButton);
+        buttons_panel.Controls.Add(exitButton);
 
         panel_end.Controls.Add(end_window);
-        panel_end.Size = new Size(8 * size_x / 9, size_y / 5);
-        panel_end.Location = new Point((size_x - end_window.Size.Width) / 2,
-                                        (size_y - end_window.Size.Height) / 2);
-        panel_end.Controls[panel_end.Controls.Count - 1].BringToFront();
+        panel_end.Controls.Add(buttons_panel);
+        panel_end.Size = new Size(8 * size_x / 9, end_window.Size.Height + buttons_panel.Size.Height + 30);
+        panel_end.Location = new Point((size_x - panel_end.Size.Width) / 2,
+                                        (size_y - panel_end.Size.Height) / 2);
+        panel_end.BackColor = Color.Transparent;
 
         this.Controls.Add(panel_end);
         this.Controls[this.Controls.Count - 1].BringToFront();
+    }
+
+    /// <summary>
+    /// Обработчик кнопки "Сыграть еще раз" - запускает новую игру с новым словом
+    /// </summary>
+    private void PlayAgainButton_Click(object sender, EventArgs e)
+    {
+        // Находим панель с результатом и удаляем её
+        Control panel_end = this.Controls.Cast<Control>().FirstOrDefault(c => c is Panel && c.Controls.Count > 0);
+        if (panel_end != null)
+        {
+            this.Controls.Remove(panel_end);
+            panel_end.Dispose();
+        }
+
+        // Загружаем новое случайное слово
+        string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "words_list.txt");
+        string newWord = GetRandomWord(path);
+        Console.WriteLine("Новое слово: " + newWord);
+
+        // Создаем новый объект игры
+        this.game = new Game(newWord);
+
+        // Сбрасываем состояние игры
+        this.isAnimating = false;
+
+        // Очищаем и пересоздаем плитки (сбрасываем текст и цвет)
+        foreach (var tile in this.tiles_dict.Values)
+        {
+            tile.Text = "";
+            tile.BackColor = this.tile_color;
+        }
+
+        // Сбрасываем цвета клавиш
+        foreach (var key in this.keys_dict.Values)
+        {
+            key.BackColor = this.key_color;
+        }
+
+        // Разблокируем ввод
+        this.game.input_blocked = false;
+    }
+
+    /// <summary>
+    /// Обработчик кнопки "Выйти из игры" - закрывает игру и возвращает в главное меню
+    /// </summary>
+    private void ExitButton_Click(object sender, EventArgs e)
+    {
+        // Закрываем форму игры - это вернёт пользователя в главное меню
+        this.Close();
+    }
+
+    /// <summary>
+    /// Выбирает случайное слово из файла словаря
+    /// </summary>
+    private string GetRandomWord(string path)
+    {
+        var lines = File.ReadAllLines(path);
+        Random r = new Random();
+        int randomLineNumber = r.Next(0, lines.Length);
+        return lines[randomLineNumber].Trim().ToUpper();
     }
 }

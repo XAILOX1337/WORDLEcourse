@@ -1,5 +1,6 @@
-﻿using WORDLE;
-using System.IO;
+﻿using System.Drawing;
+using System.Windows.Forms;
+using WORDLE;
 
 public class Game
 {
@@ -10,10 +11,11 @@ public class Game
     public bool input_blocked = false;
     private string current_word = "";
     public string word;
-    public Color yellow = Color.FromArgb(225, 204, 0);
-    public Color green = Color.FromArgb(0, 153, 51);
-    public Color red = Color.FromArgb(236, 19, 19);
-    public Color key_grey = Color.FromArgb(50, 50, 50); // Тёмно-серый для не угаданных букв
+    // Обновленная цветовая гамма - более приятные цвета
+    public Color yellow = Color.FromArgb(181, 159, 59); // Приятный желтый
+    public Color green = Color.FromArgb(83, 141, 78); // Зеленый
+    public Color red = Color.FromArgb(236, 19, 19); // Красный для поражения
+    public Color key_grey = Color.FromArgb(58, 58, 60); // Тёмно-серый для не угаданных букв
 
     private List<Label> letters_list = new List<Label>();
     private HashSet<string> valid_words = new HashSet<string>();

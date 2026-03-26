@@ -3,7 +3,7 @@ using System.Windows.Forms;
 using WORDLE;
 
 namespace WORDLE;
-// qwen --resume 6f1784c0-b017-436a-8a86-f2de6606e470
+
 public partial class Form1 : Form
 {
     private Game game;
@@ -16,9 +16,9 @@ public partial class Form1 : Form
         this.game = game;
         InitializeComponent();
 
-        // 1. Позволяем форме перехватывать нажатия клавиш
+        // Позволяем форме перехватывать нажатия клавиш
         this.KeyPreview = true;
-        // 2. Подписываемся на событие нажатия
+        // Подписываемся на событие нажатия
         this.KeyDown += new KeyEventHandler(Form1_KeyDown);
     }
 
@@ -29,7 +29,7 @@ public partial class Form1 : Form
         {
             processKey("ENTER");
         }
-        // Обработка Backspace (DELETE в твоей логике)
+        // Обработка Backspace
         else if (e.KeyCode == Keys.Back)
         {
             processKey("DELETE");

@@ -66,6 +66,7 @@ namespace WORDLE
             tile.Width = originalWidth;
             tile.Left = originalLeft;
             tile.Font = originalFont;
+            tile.BorderStyle = BorderStyle.None;
         }
 
         /// <summary>
