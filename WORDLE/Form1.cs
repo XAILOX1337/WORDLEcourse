@@ -1,3 +1,7 @@
+using System.Drawing;
+using System.Windows.Forms;
+using WORDLE;
+
 namespace WORDLE;
 // qwen --resume 6f1784c0-b017-436a-8a86-f2de6606e470
 public partial class Form1 : Form
