@@ -8,9 +8,9 @@ namespace WORDLE
 {
     public static class Animations
     {
-        private const int FlipDuration = 300;
-        private const int ShakeDuration = 400;
-        private const int KeyColorDuration = 200;
+        private const int FlipDuration = 150;
+        private const int ShakeDuration = 300;
+        private const int KeyColorDuration = 100;
 
         /// <summary>
         /// Анимация переворота плитки с изменением цвета (симметрично к центру)
