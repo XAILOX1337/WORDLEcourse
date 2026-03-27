@@ -17,8 +17,12 @@ public class Game
     public Color red = Color.FromArgb(236, 19, 19); // Красный для поражения
     public Color key_grey = Color.FromArgb(58, 58, 60); // Тёмно-серый для не угаданных букв (dark theme)
     public Color light_key_grey = Color.FromArgb(180, 180, 180); // Светло-серый для не угаданных букв (light theme)
-    
+
     private Theme currentTheme = Theme.Dark;
+    
+    // Счетчик побед и рекорд
+    public int currentStreak { get; private set; } = 0;
+    public int record { get; private set; } = 0;
 
     private List<Label> letters_list = new List<Label>();
     private HashSet<string> valid_words = new HashSet<string>();
@@ -29,15 +33,45 @@ public class Game
     {
         this.word = word;
         this.currentTheme = theme;
+        this.record = RecordManager.LoadRecord();
         load_dictionary();
     }
-    
+
     /// <summary>
     /// Возвращает текущий цвет для серых букв в зависимости от темы
     /// </summary>
     public Color currentKeyGrey
     {
         get => currentTheme == Theme.Dark ? key_grey : light_key_grey;
+    }
+    
+    /// <summary>
+    /// Увеличивает счетчик побед и обновляет рекорд при необходимости
+    /// </summary>
+    public void IncrementWinStreak()
+    {
+        currentStreak++;
+        if (currentStreak > record)
+        {
+            record = currentStreak;
+            RecordManager.SaveRecord(record);
+        }
+    }
+    
+    /// <summary>
+    /// Сбрасывает текущий счетчик при проигрыше (рекорд сохраняется)
+    /// </summary>
+    public void ResetStreak()
+    {
+        currentStreak = 0;
+    }
+    
+    /// <summary>
+    /// Устанавливает текущий счетчик (используется при продолжении игры)
+    /// </summary>
+    public void SetStreak(int streak)
+    {
+        currentStreak = streak;
     }
 
     private void load_dictionary()
@@ -73,7 +107,7 @@ public class Game
         current_word += key.Text;
         letters_list.Add(tile);
         column++;
-        
+
         // Блокируем ввод после 5 букв до нажатия Enter
         if (column == max_length)
         {
@@ -95,7 +129,7 @@ public class Game
             return EndType.FalseWordNotInDictionary;
         }
 
-        if (check_word()) 
+        if (check_word())
         {
             // Победа - переход на следующую строку
             row++;
@@ -112,7 +146,7 @@ public class Game
         input_blocked = false;
         letters_list.Clear();
         current_word = "";
-        
+
         if (row >= max_words) return EndType.FalseWordEnd;
 
         return EndType.FalseWordContinue;

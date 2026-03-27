@@ -11,12 +11,16 @@ public partial class Form1 : Form
     private Dictionary<String, Label> tiles_dict = new Dictionary<string, Label>();
     private bool isAnimating = false;
     private Theme currentTheme = Theme.Dark;
+    private Label? recordLabel;
 
     public Form1(Game game, Theme theme = Theme.Dark)
     {
         this.game = game;
         this.currentTheme = theme;
         InitializeComponent();
+        
+        // Создаем и добавляем метку рекорда
+        create_record_label();
 
         // Позволяем форме перехватывать нажатия клавиш
         this.KeyPreview = true;
@@ -47,7 +51,7 @@ public partial class Form1 : Form
     private async void processKey(string keyText)
     {
         if (isAnimating) return;
-        
+
         try
         {
             if (keyText == "ENTER")
@@ -103,7 +107,7 @@ public partial class Form1 : Form
                 Label tile = tiles_dict[tileKey];
                 Label fakeKey = new Label { Text = keyText };
                 game.enter_char(fakeKey, tile);
-                
+
                 // Анимация появления буквы
                 await Animations.PopLetterAsync(tile);
             }
@@ -172,7 +176,7 @@ public partial class Form1 : Form
                 // Не обновляем цвет если клавиша уже имеет более приоритетный цвет (зелёный > жёлтый > тёмно-серый)
                 if (color == game.green ||
                     (color == game.yellow && key.BackColor != game.green) ||
-                    (color == game.key_grey && key.BackColor != game.green && key.BackColor != game.yellow))
+                    (color == game.currentKeyGrey && key.BackColor != game.green && key.BackColor != game.yellow))
                 {
                     // Плавная анимация изменения цвета
                     await Animations.FadeKeyColorAsync(key, color);
@@ -189,7 +193,7 @@ public partial class Form1 : Form
         // Получаем плитки текущего ряда и их цвета из Game
         List<Label> row_tiles = new List<Label>();
         List<Color> tile_colors = game.get_current_row_colors();
-        
+
         for (int i = 0; i < game.max_length; i++)
         {
             string tileKey = current_row.ToString() + i.ToString();
@@ -216,7 +220,7 @@ public partial class Form1 : Form
     {
         isAnimating = true;
         int current_row = game.row;
-        
+
         // Получаем плитки текущего ряда
         List<Label> row_tiles = new List<Label>();
         for (int i = 0; i < game.max_length; i++)
@@ -230,5 +234,28 @@ public partial class Form1 : Form
 
         await Animations.ShakeAsync(row_tiles);
         isAnimating = false;
+    }
+    
+    private void create_record_label()
+    {
+        recordLabel = new Label
+        {
+            Text = $"Победы: {game.currentStreak} | Рекорд: {game.record}",
+            Font = new Font("Calibri", 14, FontStyle.Bold),
+            ForeColor = currentTheme == Theme.Light ? Color.Black : Color.White,
+            BackColor = Color.Transparent,
+            AutoSize = true,
+            TextAlign = ContentAlignment.MiddleCenter,
+            Location = new Point((size_x - 200) / 2, size_y / 20 + 100)
+        };
+        this.Controls.Add(recordLabel);
+    }
+    
+    private void update_record_label()
+    {
+        if (recordLabel != null)
+        {
+            recordLabel.Text = $"Победы: {game.currentStreak} | Рекорд: {game.record}";
+        }
     }
 }

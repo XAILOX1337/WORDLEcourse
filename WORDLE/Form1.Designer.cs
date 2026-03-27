@@ -232,13 +232,20 @@ partial class Form1
             end_window.Text = "You won!\n" + win;
             end_window.BackColor = game.green;
             game.input_blocked = true;
+            // Победа - увеличиваем счетчик
+            game.IncrementWinStreak();
         }
         else
         {
             end_window.Text = "You lost. Correct word: " + game.word.ToUpper();
             end_window.BackColor = game.red;
             game.input_blocked = true;
+            // Проигрыш - сбрасываем счетчик (рекорд сохраняется)
+            game.ResetStreak();
         }
+        
+        // Обновляем метку рекорда
+        update_record_label();
 
         end_window.Visible = true;
         end_window.Size = new Size(8 * size_x / 9, size_y / 6);
@@ -316,8 +323,14 @@ partial class Form1
         string newWord = GetRandomWord(path);
         Console.WriteLine("Новое слово: " + newWord);
 
+        // Сохраняем текущий счетчик побед перед созданием новой игры
+        int currentStreak = this.game.currentStreak;
+
         // Создаем новый объект игры с текущей темой
         this.game = new Game(newWord, currentTheme);
+        
+        // Восстанавливаем счетчик побед
+        this.game.SetStreak(currentStreak);
 
         // Сбрасываем состояние игры
         this.isAnimating = false;
@@ -327,6 +340,7 @@ partial class Form1
         {
             tile.Text = "";
             tile.BackColor = this.tile_color;
+            tile.BorderStyle = BorderStyle.FixedSingle;
         }
 
         // Сбрасываем цвета клавиш
@@ -337,6 +351,9 @@ partial class Form1
 
         // Разблокируем ввод
         this.game.input_blocked = false;
+        
+        // Обновляем метку рекорда
+        update_record_label();
     }
 
     /// <summary>

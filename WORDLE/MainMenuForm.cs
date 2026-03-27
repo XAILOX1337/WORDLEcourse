@@ -11,26 +11,27 @@ public class MainMenuForm : Form
 {
     private int size_x = 900;
     private int size_y = 700;
-    
+
     // Dark theme colors (default)
     private Color darkBackgroundColor = Color.FromArgb(18, 18, 19);
     private Color darkPrimaryColor = Color.FromArgb(83, 141, 78);
     private Color darkSecondaryColor = Color.FromArgb(129, 131, 132);
     private Color darkAccentColor = Color.FromArgb(83, 141, 78);
-    
+
     // Light theme colors
     private Color lightBackgroundColor = Color.FromArgb(227, 227, 225);
     private Color lightPrimaryColor = Color.FromArgb(83, 141, 78);
     private Color lightSecondaryColor = Color.FromArgb(180, 180, 180);
     private Color lightAccentColor = Color.FromArgb(83, 141, 78);
-    
+
     private Theme currentTheme = Theme.Dark;
-    
+
     // UI elements
     private Label titleLabel;
     private Button playButton;
     private Button settingsButton;
     private Button helpButton;
+    private Label recordLabel;
 
     public MainMenuForm()
     {
@@ -63,6 +64,22 @@ public class MainMenuForm : Form
             size_y / 8
         );
 
+        // Создаем метку рекорда
+        int record = RecordManager.LoadRecord();
+        recordLabel = new Label
+        {
+            Text = $"Рекорд: {record}",
+            Font = new Font("Calibri", 18, FontStyle.Bold),
+            ForeColor = currentTheme == Theme.Light ? Color.Black : Color.White,
+            BackColor = Color.Transparent,
+            AutoSize = true,
+            TextAlign = ContentAlignment.MiddleCenter
+        };
+        recordLabel.Location = new Point(
+            (size_x - recordLabel.PreferredWidth) / 2,
+            size_y / 12
+        );
+
         // Создаем кнопку "Начать игру"
         playButton = CreateMenuButton("Начать игру", primaryColor);
         playButton.Location = new Point(
@@ -92,6 +109,8 @@ public class MainMenuForm : Form
         this.Controls.Add(playButton);
         this.Controls.Add(settingsButton);
         this.Controls.Add(helpButton);
+        this.Controls.Add(recordLabel);
+        recordLabel.BringToFront();
     }
 
     /// <summary>
@@ -161,16 +180,18 @@ public class MainMenuForm : Form
         {
             this.Show();
             this.Activate();
+            // Обновляем метку рекорда после возврата из игры
+            UpdateRecordLabel();
         };
     }
 
     private void SettingsButton_Click(object? sender, EventArgs e)
     {
-        
+
         // Открываем форму настроек
         SettingsForm settingsForm = new SettingsForm(currentTheme);
         settingsForm.ShowDialog();
-        
+
         // После закрытия настроек применяем тему
         if (settingsForm.GetCurrentTheme() != currentTheme)
         {
@@ -184,12 +205,19 @@ public class MainMenuForm : Form
         Color bgColor = currentTheme == Theme.Dark ? darkBackgroundColor : lightBackgroundColor;
         Color accentClr = currentTheme == Theme.Dark ? darkAccentColor : lightAccentColor;
         Color secColor = currentTheme == Theme.Dark ? darkSecondaryColor : lightSecondaryColor;
-        
+
         this.BackColor = bgColor;
         titleLabel.ForeColor = accentClr;
+        recordLabel.ForeColor = currentTheme == Theme.Light ? Color.Black : Color.White;
         playButton.BackColor = primaryColor;
         settingsButton.BackColor = secColor;
         helpButton.BackColor = secColor;
+    }
+    
+    private void UpdateRecordLabel()
+    {
+        int record = RecordManager.LoadRecord();
+        recordLabel.Text = $"Рекорд: {record}";
     }
 
     private void HelpButton_Click(object? sender, EventArgs e)
