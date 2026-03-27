@@ -35,7 +35,7 @@ partial class Form1
 
         this.Size = new System.Drawing.Size(size_x, size_y);
         this.Text = "WORDLE";
-        this.BackColor = Color.FromArgb(18, 18, 18);
+        this.BackColor = backgroundColor;
         create_tiles();
         create_keyboard();
         this.CenterToScreen();
@@ -47,8 +47,31 @@ partial class Form1
     private Panel panel_tiles = new Panel();
     private int size_x = 900;
     private int size_y = 1100;
-    private Color tile_color = Color.FromArgb(18, 18, 19); // Более мягкий серый для плиток
-    private Color key_color = Color.FromArgb(129, 131, 132); // Мягкий серый для клавиш
+    
+    // Dark theme colors (default)
+    private Color darkBackgroundColor = Color.FromArgb(18, 18, 18);
+    private Color darkTileColor = Color.FromArgb(18, 18, 19);
+    private Color darkKeyColor = Color.FromArgb(129, 131, 132);
+
+    // Light theme colors
+    private Color lightBackgroundColor = Color.FromArgb(227, 227, 225);
+    private Color lightTileColor = Color.FromArgb(227, 227, 225);
+    private Color lightKeyColor = Color.FromArgb(180, 180, 180);
+
+    private Color backgroundColor
+    {
+        get => currentTheme == Theme.Dark ? darkBackgroundColor : lightBackgroundColor;
+    }
+
+    private Color tile_color
+    {
+        get => currentTheme == Theme.Dark ? darkTileColor : lightTileColor;
+    }
+
+    private Color key_color
+    {
+        get => currentTheme == Theme.Dark ? darkKeyColor : lightKeyColor;
+    }
 
     private void create_keyboard()
     {
@@ -81,7 +104,7 @@ partial class Form1
     private void create_keyboard_row(string[] keys, int row_index, int key_width, int key_height, int space, int indent_extra = 0, bool is_special_row = false)
     {
         int row_length = keys.Length;
-        
+
         // Для специального ряда считаем ширину с учётом широких клавиш
         int total_width;
         if (is_special_row)
@@ -93,7 +116,7 @@ partial class Form1
         {
             total_width = row_length * key_width + (row_length - 1) * space;
         }
-        
+
         int indent = (size_x - total_width) / 2 + indent_extra;
 
         for (int j = 0; j < keys.Length; j++)
@@ -107,7 +130,7 @@ partial class Form1
                 TextAlign = ContentAlignment.MiddleCenter,
                 Font = new Font("Calibri", 16, FontStyle.Bold),
                 BackColor = key_color,
-                ForeColor = Color.White,
+                ForeColor = currentTheme == Theme.Light ? Color.Black : Color.White,
                 Cursor = Cursors.Hand,
                 Visible = true
             };
@@ -138,7 +161,7 @@ partial class Form1
             {
                 keys_dict.Add(key.Name, key);
             }
-            
+
             // Делаем закругленные углы клавиши
             MakeLabelRounded(key, 10);
         }
@@ -178,13 +201,13 @@ partial class Form1
                     TextAlign = ContentAlignment.MiddleCenter,
                     Text = "",
                     Name = i.ToString() + j.ToString(),
-                    ForeColor = Color.White,
+                    ForeColor = currentTheme == Theme.Light ? Color.Black : Color.White,
                     BackColor = tile_color
                 };
                 tile.Visible = true;
                 tiles_dict.Add(tile.Name, tile);
                 panel_tiles.Controls.Add(tile);
-                
+
             }
         }
         panel_tiles.Size = new Size(5 * (tile_size + space) + 4 * space, 6 * (tile_size + space) + 5 * space);
@@ -241,7 +264,7 @@ partial class Form1
             Height = 45,
             Location = new Point((buttons_panel.Width - 420) / 2, 10)
         };
-        
+
         playAgainButton.FlatAppearance.BorderSize = 0;
         playAgainButton.Click += PlayAgainButton_Click;
 
@@ -293,8 +316,8 @@ partial class Form1
         string newWord = GetRandomWord(path);
         Console.WriteLine("Новое слово: " + newWord);
 
-        // Создаем новый объект игры
-        this.game = new Game(newWord);
+        // Создаем новый объект игры с текущей темой
+        this.game = new Game(newWord, currentTheme);
 
         // Сбрасываем состояние игры
         this.isAnimating = false;

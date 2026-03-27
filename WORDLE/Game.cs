@@ -15,17 +15,29 @@ public class Game
     public Color yellow = Color.FromArgb(181, 159, 59); // Приятный желтый
     public Color green = Color.FromArgb(83, 141, 78); // Зеленый
     public Color red = Color.FromArgb(236, 19, 19); // Красный для поражения
-    public Color key_grey = Color.FromArgb(58, 58, 60); // Тёмно-серый для не угаданных букв
+    public Color key_grey = Color.FromArgb(58, 58, 60); // Тёмно-серый для не угаданных букв (dark theme)
+    public Color light_key_grey = Color.FromArgb(180, 180, 180); // Светло-серый для не угаданных букв (light theme)
+    
+    private Theme currentTheme = Theme.Dark;
 
     private List<Label> letters_list = new List<Label>();
     private HashSet<string> valid_words = new HashSet<string>();
     private Dictionary<string, Color> keyboard_colors = new Dictionary<string, Color>();
     private List<Color> current_row_colors = new List<Color>(); // Цвета для текущего ряда
 
-    public Game(string word)
+    public Game(string word, Theme theme = Theme.Dark)
     {
         this.word = word;
+        this.currentTheme = theme;
         load_dictionary();
+    }
+    
+    /// <summary>
+    /// Возвращает текущий цвет для серых букв в зависимости от темы
+    /// </summary>
+    public Color currentKeyGrey
+    {
+        get => currentTheme == Theme.Dark ? key_grey : light_key_grey;
     }
 
     private void load_dictionary()
@@ -138,7 +150,7 @@ public class Game
             string letter = letters_list[i].Text;
             if (!letter_count.ContainsKey(letter)) letter_count[letter] = 0;
 
-            Color tileColor = key_grey; // По умолчанию серый
+            Color tileColor = currentKeyGrey; // По умолчанию серый (зависит от темы)
             
             if (letter == word[i].ToString())
             {
@@ -183,7 +195,7 @@ public class Game
                     {
                         if (letters_list[j].Text == letter && current_row_colors[j] == yellow)
                         {
-                            current_row_colors[j] = key_grey;
+                            current_row_colors[j] = currentKeyGrey;
                             excess--;
                         }
                     }
@@ -234,9 +246,9 @@ public class Game
                 {
                     keyboard_colors[letter] = yellow;
                 }
-                else if (tileColor == key_grey && keyboard_colors[letter] != green && keyboard_colors[letter] != yellow)
+                else if (tileColor == currentKeyGrey && keyboard_colors[letter] != green && keyboard_colors[letter] != yellow)
                 {
-                    keyboard_colors[letter] = key_grey;
+                    keyboard_colors[letter] = currentKeyGrey;
                 }
             }
         }

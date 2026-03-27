@@ -10,10 +10,12 @@ public partial class Form1 : Form
     private Dictionary<String, Label> keys_dict = new Dictionary<string, Label>();
     private Dictionary<String, Label> tiles_dict = new Dictionary<string, Label>();
     private bool isAnimating = false;
-    
-    public Form1(Game game)
+    private Theme currentTheme = Theme.Dark;
+
+    public Form1(Game game, Theme theme = Theme.Dark)
     {
         this.game = game;
+        this.currentTheme = theme;
         InitializeComponent();
 
         // Позволяем форме перехватывать нажатия клавиш

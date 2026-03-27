@@ -11,11 +11,26 @@ public class MainMenuForm : Form
 {
     private int size_x = 900;
     private int size_y = 700;
-    // Более приятная цветовая гамма
-    private Color backgroundColor = Color.FromArgb(18, 18, 19); 
-    private Color primaryColor = Color.FromArgb(83, 141, 78); 
-    private Color secondaryColor = Color.FromArgb(129, 131, 132); 
-    private Color accentColor = Color.FromArgb(83, 141, 78); 
+    
+    // Dark theme colors (default)
+    private Color darkBackgroundColor = Color.FromArgb(18, 18, 19);
+    private Color darkPrimaryColor = Color.FromArgb(83, 141, 78);
+    private Color darkSecondaryColor = Color.FromArgb(129, 131, 132);
+    private Color darkAccentColor = Color.FromArgb(83, 141, 78);
+    
+    // Light theme colors
+    private Color lightBackgroundColor = Color.FromArgb(227, 227, 225);
+    private Color lightPrimaryColor = Color.FromArgb(83, 141, 78);
+    private Color lightSecondaryColor = Color.FromArgb(180, 180, 180);
+    private Color lightAccentColor = Color.FromArgb(83, 141, 78);
+    
+    private Theme currentTheme = Theme.Dark;
+    
+    // UI elements
+    private Label titleLabel;
+    private Button playButton;
+    private Button settingsButton;
+    private Button helpButton;
 
     public MainMenuForm()
     {
@@ -33,7 +48,7 @@ public class MainMenuForm : Form
         this.MaximizeBox = false;
 
         // Создаем заголовок WORDLE большим шрифтом
-        Label titleLabel = new Label
+        titleLabel = new Label
         {
             Text = "WORDLE",
             Font = new Font("Calibri", 72, FontStyle.Bold),
@@ -49,23 +64,23 @@ public class MainMenuForm : Form
         );
 
         // Создаем кнопку "Начать игру"
-        Button playButton = CreateMenuButton("Начать игру", primaryColor);
+        playButton = CreateMenuButton("Начать игру", primaryColor);
         playButton.Location = new Point(
             (size_x - playButton.Width) / 2,
             size_y / 3
         );
         playButton.Click += PlayButton_Click;
 
-        // Создаем кнопку "Настройки" (зарезервировано для будущего функционала)
-        Button settingsButton = CreateMenuButton("Настройки", secondaryColor);
+        // Создаем кнопку "Настройки"
+        settingsButton = CreateMenuButton("Настройки", secondaryColor);
         settingsButton.Location = new Point(
             (size_x - settingsButton.Width) / 2,
             size_y / 3 + 70
         );
         settingsButton.Click += SettingsButton_Click;
 
-        // Создаем кнопку "Справка" (зарезервировано для будущего функционала)
-        Button helpButton = CreateMenuButton("Справка", secondaryColor);
+        // Создаем кнопку "Справка"
+        helpButton = CreateMenuButton("Справка", secondaryColor);
         helpButton.Location = new Point(
             (size_x - helpButton.Width) / 2,
             size_y / 3 + 140
@@ -135,8 +150,8 @@ public class MainMenuForm : Form
         string word = GetRandomWord(path);
 
 
-        Game game = new Game(word);
-        Form1 gameForm = new Form1(game);
+        Game game = new Game(word, currentTheme);
+        Form1 gameForm = new Form1(game, currentTheme);
         gameForm.Show();
         Console.WriteLine("Загаданное слово: " + word);
 
@@ -151,13 +166,30 @@ public class MainMenuForm : Form
 
     private void SettingsButton_Click(object? sender, EventArgs e)
     {
-        // Заглушка для будущего функционала настроек
-        MessageBox.Show(
-            "Функционал настроек будет добавлен в следующей версии.",
-            "Настройки",
-            MessageBoxButtons.OK,
-            MessageBoxIcon.Information
-        );
+        
+        // Открываем форму настроек
+        SettingsForm settingsForm = new SettingsForm(currentTheme);
+        settingsForm.ShowDialog();
+        
+        // После закрытия настроек применяем тему
+        if (settingsForm.GetCurrentTheme() != currentTheme)
+        {
+            currentTheme = settingsForm.GetCurrentTheme();
+            ApplyTheme();
+        }
+    }
+
+    private void ApplyTheme()
+    {
+        Color bgColor = currentTheme == Theme.Dark ? darkBackgroundColor : lightBackgroundColor;
+        Color accentClr = currentTheme == Theme.Dark ? darkAccentColor : lightAccentColor;
+        Color secColor = currentTheme == Theme.Dark ? darkSecondaryColor : lightSecondaryColor;
+        
+        this.BackColor = bgColor;
+        titleLabel.ForeColor = accentClr;
+        playButton.BackColor = primaryColor;
+        settingsButton.BackColor = secColor;
+        helpButton.BackColor = secColor;
     }
 
     private void HelpButton_Click(object? sender, EventArgs e)
@@ -165,15 +197,47 @@ public class MainMenuForm : Form
         // Заглушка для будущего функционала справки
         MessageBox.Show(
             "Правила игры Wordle:\n\n" +
-            "• Угадайте слово за 6 попыток\n" +
+            "• Угадайте слово, состоящее из 5 букв за 6 попыток\n" +
+            "• Вводить можно только реальные слова\n" +
             "• Зеленый цвет - буква на правильном месте\n" +
             "• Желтый цвет - буква есть в слове, но не на своем месте\n" +
-            "• Серый цвет - буквы нет в слове\n\n" +
-            "Полная справка будет добавлена в следующей версии.",
+            "• Серый цвет - буквы нет в слове\n\n",
             "Справка",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information
         );
+    }
+
+    /// <summary>
+    /// Возвращает текущий цвет фона в зависимости от темы
+    /// </summary>
+    private Color backgroundColor
+    {
+        get => currentTheme == Theme.Dark ? darkBackgroundColor : lightBackgroundColor;
+    }
+
+    /// <summary>
+    /// Возвращает текущий основной цвет в зависимости от темы
+    /// </summary>
+    private Color primaryColor
+    {
+        get => darkPrimaryColor; // Основной цвет одинаковый для обеих тем
+    }
+
+    /// <summary>
+    /// Возвращает текущий вторичный цвет в зависимости от темы
+    /// </summary>
+    private Color secondaryColor
+    {
+        get => currentTheme == Theme.Dark ? darkSecondaryColor : lightSecondaryColor;
+    }
+
+    /// <summary>
+    /// Возвращает текущий акцентный цвет в зависимости от темы
+    /// </summary>
+    private Color accentColor
+    {
+        get => darkAccentColor; // Акцентный цвет одинаковый для обеих тем
     }
 
     /// <summary>

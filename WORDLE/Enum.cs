@@ -7,5 +7,10 @@ public enum EndType
     FalseWordEnd,
     FalseWordLength,
     FalseWordNotInDictionary
+}
 
+public enum Theme
+{
+    Dark,
+    Light
 }
