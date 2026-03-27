@@ -76,18 +76,12 @@ public class Game
 
     private void load_dictionary()
     {
-        // valid_words уже инициализирован в объявлении поля
-        string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "words_list.txt");
         try
         {
-            var lines = File.ReadAllLines(path);
-            foreach (var line in lines)
+            var words = ResourceLoader.GetWordsList();
+            foreach (var word in words)
             {
-                string trimmed = line.Trim().ToUpper();
-                if (!string.IsNullOrEmpty(trimmed))
-                {
-                    valid_words.Add(trimmed);
-                }
+                valid_words.Add(word);
             }
         }
         catch (Exception ex)

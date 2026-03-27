@@ -319,8 +319,7 @@ partial class Form1
         }
 
         // Загружаем новое случайное слово
-        string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "words_list.txt");
-        string newWord = GetRandomWord(path);
+        string newWord = GetRandomWord();
         Console.WriteLine("Новое слово: " + newWord);
 
         // Сохраняем текущий счетчик побед перед созданием новой игры
@@ -328,7 +327,7 @@ partial class Form1
 
         // Создаем новый объект игры с текущей темой
         this.game = new Game(newWord, currentTheme);
-        
+
         // Восстанавливаем счетчик побед
         this.game.SetStreak(currentStreak);
 
@@ -368,11 +367,11 @@ partial class Form1
     /// <summary>
     /// Выбирает случайное слово из файла словаря
     /// </summary>
-    private string GetRandomWord(string path)
+    private string GetRandomWord()
     {
-        var lines = File.ReadAllLines(path);
+        var words = ResourceLoader.GetWordsList();
         Random r = new Random();
-        int randomLineNumber = r.Next(0, lines.Length);
-        return lines[randomLineNumber].Trim().ToUpper();
+        int randomIndex = r.Next(0, words.Length);
+        return words[randomIndex].Trim().ToUpper();
     }
 }

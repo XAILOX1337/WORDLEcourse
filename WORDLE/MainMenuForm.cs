@@ -165,8 +165,7 @@ public class MainMenuForm : Form
         this.Hide();
 
         // Создаем новую игру со случайным словом
-        string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "words_list.txt");
-        string word = GetRandomWord(path);
+        string word = GetRandomWord();
 
 
         Game game = new Game(word, currentTheme);
@@ -271,11 +270,11 @@ public class MainMenuForm : Form
     /// <summary>
     /// Выбирает случайное слово из файла словаря
     /// </summary>
-    private string GetRandomWord(string path)
+    private string GetRandomWord()
     {
-        var lines = File.ReadAllLines(path);
+        var words = ResourceLoader.GetWordsList();
         Random r = new Random();
-        int randomLineNumber = r.Next(0, lines.Length);
-        return lines[randomLineNumber].Trim().ToUpper();
+        int randomIndex = r.Next(0, words.Length);
+        return words[randomIndex].Trim().ToUpper();
     }
 }
