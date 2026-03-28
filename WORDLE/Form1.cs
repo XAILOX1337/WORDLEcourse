@@ -10,6 +10,7 @@ public partial class Form1 : Form
     private Dictionary<String, Label> keys_dict = new Dictionary<string, Label>();
     private Dictionary<String, Label> tiles_dict = new Dictionary<string, Label>();
     private bool isAnimating = false;
+    private bool isKeyboardAnimating = false;
     private Theme currentTheme = Theme.Dark;
     private Label? recordLabel;
 
@@ -162,26 +163,37 @@ public partial class Form1 : Form
 
     public async void update_key_colors()
     {
-        // Получаем цвета для каждой буквы из игры
-        Dictionary<string, Color> letter_colors = game.get_letter_colors();
+        // Блокируем кнопку "Сыграть еще раз" на время анимации клавиш
+        isKeyboardAnimating = true;
 
-        foreach (var kvp in letter_colors)
+        try
         {
-            string letter = kvp.Key;
-            Color color = kvp.Value;
+            // Получаем цвета для каждой буквы из игры
+            Dictionary<string, Color> letter_colors = game.get_letter_colors();
 
-            if (keys_dict.ContainsKey(letter))
+            foreach (var kvp in letter_colors)
             {
-                Label key = keys_dict[letter];
-                // Не обновляем цвет если клавиша уже имеет более приоритетный цвет (зелёный > жёлтый > тёмно-серый)
-                if (color == game.green ||
-                    (color == game.yellow && key.BackColor != game.green) ||
-                    (color == game.currentKeyGrey && key.BackColor != game.green && key.BackColor != game.yellow))
+                string letter = kvp.Key;
+                Color color = kvp.Value;
+
+                if (keys_dict.ContainsKey(letter))
                 {
-                    // Плавная анимация изменения цвета
-                    await Animations.FadeKeyColorAsync(key, color);
+                    Label key = keys_dict[letter];
+                    // Не обновляем цвет если клавиша уже имеет более приоритетный цвет (зелёный > жёлтый > тёмно-серый)
+                    if (color == game.green ||
+                        (color == game.yellow && key.BackColor != game.green) ||
+                        (color == game.currentKeyGrey && key.BackColor != game.green && key.BackColor != game.yellow))
+                    {
+                        // Плавная анимация изменения цвета
+                        await Animations.FadeKeyColorAsync(key, color);
+                    }
                 }
             }
+        }
+        finally
+        {
+            // Разблокируем после завершения всех анимаций
+            isKeyboardAnimating = false;
         }
     }
 

@@ -310,6 +310,12 @@ partial class Form1
     /// </summary>
     private void PlayAgainButton_Click(object sender, EventArgs e)
     {
+        // Защита: если анимация клавиатуры ещё идёт, игнорируем нажатие
+        if (isKeyboardAnimating)
+        {
+            return;
+        }
+
         // Находим панель с результатом и удаляем её
         Control panel_end = this.Controls.Cast<Control>().FirstOrDefault(c => c is Panel && c.Controls.Count > 0);
         if (panel_end != null)
@@ -333,6 +339,7 @@ partial class Form1
 
         // Сбрасываем состояние игры
         this.isAnimating = false;
+        this.isKeyboardAnimating = false;
 
         // Очищаем и пересоздаем плитки (сбрасываем текст и цвет)
         foreach (var tile in this.tiles_dict.Values)
@@ -350,7 +357,7 @@ partial class Form1
 
         // Разблокируем ввод
         this.game.input_blocked = false;
-        
+
         // Обновляем метку рекорда
         update_record_label();
     }
